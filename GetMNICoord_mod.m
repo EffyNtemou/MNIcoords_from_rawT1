@@ -18,13 +18,12 @@ for i = 1:size(NativeCoords, 1)
     % Round to nearest integer voxel:
     NativeCoordvox = round(NativeCoordvox);
 
-    % Alternative faster version using spm_sample_vol:
     for dim = 1:3
         MNICoordinates(i, dim) = spm_sample_vol(spm_vol([InverseDeformationField ',1,' num2str(dim)]), NativeCoordvox(1), NativeCoordvox(2), NativeCoordvox(3), 0);
     end
 
     % Display the MNI coordinates
-    fprintf('MNI Coordinates for Native Coord %d: [%.2f %.2f %.2f]\n', i, MNICoordinates(i, 1), MNICoordinates(i, 2), MNICoordinates(i, 3));
+    fprintf('MNI Coordinates for Native Coord %d: [%.2f, %.2f, %.2f]\n', i, MNICoordinates(i, 1), MNICoordinates(i, 2), MNICoordinates(i, 3));
 end
 
 end
