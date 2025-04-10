@@ -1,0 +1,46 @@
+% Load Excel data from your local path
+data = readtable('/Users/c.kramer/Downloads/KF_dataset_with_combined_sheet.xlsx');
+
+% Save it to a .mat file in the current MATLAB folder
+save('KF_dataset.mat', 'data');
+
+% Load the pre-saved dataset
+load('KF_dataset.mat');  % loads variable "data"
+
+% Path to your deformation fields
+deformationPath = '/Users/c.kramer/Cognitive_Neurosurgery_Lab/Segmentation_inv';
+
+% Preallocate cell array for output
+MNI_Output = cell(height(data), 5);  % Columns: Name, X_MNI, Y_MNI, Z_MNI, DeformationField
+
+% Loop through each row in the dataset
+for i = 1:height(data)
+    % Extract values from the current row
+    subjectName = data{i, 'name'}{1};
+    NativeCoord = [data{i, 'x'}, data{i, 'y'}, data{i, 'z'}];
+    deformationFile = fullfile(deformationPath, data{i, 'deformationFieldName'}{1});
+
+    % Call the correct function: GetMNICoord_Effy
+    MNICoord = GetMNICoord_Effy(deformationFile, NativeCoord);
+
+    % Store output
+    MNI_Output{i, 1} = subjectName;
+    MNI_Output{i, 2} = MNICoord(1);
+    MNI_Output{i, 3} = MNICoord(2);
+    MNI_Output{i, 4} = MNICoord(3);
+    MNI_Output{i, 5} = data{i, 'deformationFieldName'}{1};
+
+    % Print status
+    fprintf('Row %d (%s) - MNI: [%.2f %.2f %.2f]\n', ...
+        i, subjectName, MNICoord(1), MNICoord(2), MNICoord(3));
+end
+
+% Convert cell array to table
+MNI_Table = cell2table(MNI_Output, ...
+    'VariableNames', {'Subject', 'X_MNI', 'Y_MNI', 'Z_MNI', 'DeformationField'});
+
+% Save output to Excel
+outputPath = fullfile(pwd, 'MNI_Coordinates_Output.xlsx');
+writetable(MNI_Table, outputPath);
+
+fprintf('\n✅ MNI coordinates saved to: %s\n', outputPath);
